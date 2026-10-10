@@ -50,6 +50,31 @@ def test_identifier_normalization():
             normalize_doi(value)
 
 
+def test_prepared_profile_and_rescored_total(tmp_path):
+    root = tmp_path / "library"
+    item = paper(tmp_path)
+    p = profile(1)
+    p["language"] = "en"
+    p["timezone"] = "America/New_York"
+    p["project"]["research_question"] = "Which assumptions change decisions?"
+    result = prepare(root, "2026-10-10", [item], p)
+    preview = Path(result["overview"]).read_text(encoding="utf-8")
+    assert "Which assumptions change decisions?" in preview
+    assert "America/New_York" in preview
+    assert "Author abstract, faithfully paraphrased" in preview
+    assert "90/100" in preview
+    publish(root, "2026-10-10", [item], p)
+    item["score"]["evidence"] += 1
+    update_pool(root, [item])
+    ledger = json.loads((root / "registry.json").read_text(encoding="utf-8"))
+    assert ledger["papers"][0]["score_total"] == sum(item["score"].values()) == 91
+    assert ledger["papers"][0]["recommended_dates"] == ["2026-10-10"]
+    assert validate_library(root)["ok"]
+    ledger["papers"][0]["score_total"] = 1
+    (root / "registry.json").write_text(json.dumps(ledger), encoding="utf-8")
+    assert not validate_library(root)["ok"]
+
+
 def test_prepare_does_not_recommend_and_weekend_publish_is_idempotent(tmp_path):
     root = tmp_path / "中文 library"
     items = [paper(tmp_path, n) for n in (1, 2)]

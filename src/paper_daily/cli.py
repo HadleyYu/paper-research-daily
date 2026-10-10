@@ -130,7 +130,7 @@ def main(argv=None):
         elif command == "pool":
             result = library.update_pool(root, _papers(args.input))
         elif command == "prepare":
-            result = library.prepare(root, date or report_date(profile), _papers(args.input))
+            result = library.prepare(root, date or report_date(profile), _papers(args.input), profile)
         elif command == "publish":
             result = library.publish(root, date or report_date(profile), _papers(args.input), profile)
         elif command == "validate":

@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -12,7 +13,8 @@ class InstallTests(unittest.TestCase):
     def test_copy_is_portable_and_refuses_overwrite(self):
         with tempfile.TemporaryDirectory(prefix="skills 中文 ") as temp:
             command = [sys.executable, str(ROOT / "scripts/install_skill.py"), "--dest", temp]
-            result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
+            environment = dict(os.environ, PYTHONIOENCODING="cp1252")
+            result = subprocess.run(command, capture_output=True, text=True, encoding="utf-8", env=environment)
             self.assertEqual(result.returncode, 0, result.stderr)
             installed = Path(temp) / "paper-research-daily"
             self.assertTrue((installed/"SKILL.md").is_file())

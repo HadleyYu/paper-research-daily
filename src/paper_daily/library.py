@@ -22,6 +22,8 @@ from pypdf import PdfReader
 
 from .render import SECTION_KEYS, render_overview
 
+SCORE_KEYS = {"relevance", "evidence", "inspiration", "novelty", "representative", "reproducibility"}
+
 
 def normalize_doi(value: str | None) -> str | None:
     value = unquote(str(value or "").strip())
@@ -190,6 +192,15 @@ def _pdf(path):
 
 def _canonical(record, root=None):
     paper = json.loads(json.dumps(record))
+    if "score" in paper:
+        score = paper.get("score")
+        if (isinstance(score, dict) and set(score) == SCORE_KEYS and
+                all(type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 100
+                    for value in score.values()) and sum(score.values()) <= 100):
+            paper["score_total"] = sum(score.values())
+        else:
+            paper["score_total"] = None
+        paper.setdefault("score_provisional", True)
     if not isinstance(paper.get("title"), str) or not paper["title"].strip():
         raise ValueError("Paper title is required")
     if not isinstance(paper.get("authors", []), list) or not all(isinstance(x, str) for x in paper.get("authors", [])):
@@ -313,7 +324,7 @@ def update_pool(root: Path, records) -> dict:
         return _pool_update(root, records)
 
 
-def prepare(root: Path, date: str, candidates: list[dict]) -> dict:
+def prepare(root: Path, date: str, candidates: list[dict], profile: dict | None = None) -> dict:
     _date(date)
     with _lock(root) as root:
         result = _pool_update(root, candidates)
@@ -335,7 +346,7 @@ def prepare(root: Path, date: str, candidates: list[dict]) -> dict:
                   "尚未正式推荐，不占用日报名额，也未新增推荐历史。以下为已登记候选的工作稿；数量可能不足，评分与卡片可能仍待核验。\n\n"
                   "Prepared candidates only: this is not a published daily report. No recommendation history is consumed. Counts, scores and analysis may be incomplete.\n\n")
         overview = folder / "00_prepared.md"
-        _atomic(overview, header + render_overview(date, preview, {"language": "zh-CN"}), text=True)
+        _atomic(overview, header + render_overview(date, preview, profile or {"language": "zh-CN"}), text=True)
         return {"date": date, "prepared": len(result["accepted"]), "rejected": result["rejected"], "recommended": 0, "overview": str(overview)}
 
 
@@ -411,6 +422,7 @@ def _check_paper(paper, day, profile):
         if not paper.get("score_reason"):
             raise ValueError("Score rationale is required")
         paper["score_total"] = total
+        paper["score_provisional"] = evidence != "fulltext"
     if not paper.get("selection_reason"):
         raise ValueError("Priority/selection rationale is required")
     if not paper.get("source_pdf") and not (paper.get("download_reason") or paper.get("download_status")):
@@ -513,6 +525,11 @@ def validate_library(root: Path, date=None, profile=None) -> dict:
     registry = _registry(root)
     seen = {}
     for paper in registry["papers"]:
+        scores = paper.get("score")
+        if isinstance(scores, dict) and set(scores) == SCORE_KEYS:
+            if all(type(v) in (int, float) and math.isfinite(v) for v in scores.values()):
+                if paper.get("score_total") != sum(scores.values()):
+                    errors.append(f"Score total disagrees with components: {paper['id']}")
         dates = paper.get("recommended_dates", [])
         if len(dates) != len(set(dates)) or len(dates) > 1 or (dates and paper.get("status") == "preexisting"):
             errors.append(f"Invalid recommendation history: {paper['id']}")

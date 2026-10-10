@@ -18,6 +18,10 @@ def _cell(value):
     return str(value).replace("|", "\\|").replace("\n", " ")
 
 
+def _pdf_target(value):
+    return value if value.startswith("file://") else quote(value)
+
+
 def _content(value):
     if isinstance(value, str):
         return value
@@ -55,14 +59,14 @@ def render_overview(date: str, papers: list[dict], profile: dict) -> str:
         score = p.get("score_total")
         source = p.get('venue') or p.get('category', '')
         paper_date = p.get('first_announced_date') or p.get('publication_date', '')
-        entry = f"[PDF]({quote(p['pdf_file'])})" if p.get('pdf_file') else f"[{'入口' if zh else 'Entry'}]({p.get('official_url', '')})"
+        entry = f"[PDF]({_pdf_target(p['pdf_file'])})" if p.get('pdf_file') else f"[{'入口' if zh else 'Entry'}]({p.get('official_url', '')})"
         lines.append(f"| {p['rank']:02d} | {_cell(p['title'])} | {_cell(source)} · {_cell(paper_date)} | {_cell(p.get('one_sentence', ''))} | {score if score is not None else 'pending'} | {entry} |")
     for p in papers:
         lines += ["", f"## {p['rank']:02d} · {p['title']}", "", "；".join(p.get("authors", [])), "",
                   f"{p.get('venue', '')} · {p.get('publication_status', '')} · {p.get('version', 'version not supplied')}", ""]
         links = []
         if p.get("pdf_file"):
-            links.append(f"[PDF]({quote(p['pdf_file'], safe='/:')})")
+            links.append(f"[PDF]({_pdf_target(p['pdf_file'])})")
         if p.get("doi"):
             links.append(f"[DOI](https://doi.org/{p['doi']})")
         if p.get("arxiv_id"):

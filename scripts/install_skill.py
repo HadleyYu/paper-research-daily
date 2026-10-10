@@ -36,6 +36,9 @@ def install(destination: Path) -> Path:
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dest", required=True, type=Path, help="The agent's skills parent directory")
     args = parser.parse_args()
