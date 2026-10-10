@@ -1,0 +1,40 @@
+[
+  {
+    "example_only": true,
+    "title": "EXAMPLE ONLY: Evidence-aware literature curation",
+    "authors": [
+      "Example Researcher"
+    ],
+    "doi": null,
+    "arxiv_id": null,
+    "category": "published",
+    "publication_status": "unverified",
+    "official_url": "https://example.org/example-paper",
+    "version": "Synthetic card demonstration; not a real publication",
+    "evidence_level": "abstract",
+    "source_pdf": null,
+    "download_status": "not_attempted",
+    "download_reason": "This is a synthetic schema example, not a downloadable paper.",
+    "score": null,
+    "score_reason": "No score: this demonstration contains no research evidence.",
+    "sections": {
+      "abstract": "EXAMPLE ONLY. Paraphrase the verified author abstract in your own words. Identify the problem, method and conclusion, and link the exact source. Do not invent a study to fill this template.",
+      "problem": "Describe the research question, setting, available inputs, required outputs and the important constraints.",
+      "mechanism": "Explain the method in ordered causal steps. Include an equation only when it helps, defining every symbol and identifying the original equation or your structural summary.",
+      "novelty": "Separate inherited components from the new contribution and compare with a verified direct predecessor.",
+      "evidence": "| Conditions and baseline | Result | Source and boundary |\n|---|---|---|\n| Replace with verified conditions | Include metric and denominator | Cite section, page, table or theorem; state limits |",
+      "limitations": "Connect specific assumptions to consequences. Distinguish an observed failure, a missing experiment and information that has not been checked.",
+      "relevance": "Independent analysis: explain which part of the configured research question this could inform, and what must hold for transfer.",
+      "microexperiment": "Proposed next step, not a reported result: specify a hypothesis, data or platform, fair-budget comparison, metric and a result that would falsify the hypothesis. For nonexperimental fields propose an appropriate verifiable follow-up.",
+      "reading": "Name the first sections to read and the questions each answers. Verify that any code/data link belongs to this exact paper. Record read-only inspection separately from running a reproduction."
+    },
+    "sources": [
+      {
+        "url": "https://example.org/example-paper",
+        "role": "illustration_only"
+      }
+    ],
+    "selection_reason": "Not eligible for publication; replace with an actual verified candidate.",
+    "status": "awaiting_verification"
+  }
+]

@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Reliable decision-making with learned models",
+    "research_question": "Which model errors change decisions, and what evidence demonstrates reliable improvement?",
+    "topics": [
+      "model uncertainty",
+      "decision quality",
+      "limited data"
+    ],
+    "exclude": [
+      "unrelated visual generation"
+    ],
+    "level": "graduate"
+  },
+  "output_root": "./literature",
+  "language": "zh-CN",
+  "timezone": "Asia/Shanghai",
+  "selection": {
+    "daily_count": 8,
+    "new_count": 4,
+    "published_count": 4,
+    "weekend_mode": "combined",
+    "lookback_hours": 72,
+    "max_lookback_days": 7,
+    "min_score": 75,
+    "min_relevance": 25,
+    "allow_abstract_only": false,
+    "pool_limit": 100,
+    "reevaluate_days": 14
+  },
+  "scoring": {
+    "relevance": 35,
+    "evidence": 25,
+    "inspiration": 20,
+    "novelty": 10,
+    "representative": 5,
+    "reproducibility": 5
+  },
+  "sources": {
+    "new": [
+      "arxiv"
+    ],
+    "published": [
+      "crossref",
+      "openalex",
+      "official"
+    ]
+  },
+  "analysis": {
+    "depth": "dense",
+    "chinese_character_range": [
+      1200,
+      1800
+    ],
+    "distinguish_author_and_analysis": true
+  },
+  "schedule": {
+    "enabled": false,
+    "timezone": "America/New_York",
+    "prepare_time": "19:00",
+    "final_time": "20:05",
+    "deadline": "09:30"
+  },
+  "confirmation": {
+    "status": "draft",
+    "confirmed_at": null
+  }
+}
