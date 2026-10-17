@@ -84,7 +84,7 @@ python scripts/paper_daily.py confirm --profile ./my-profile.json
 
 分数是有依据的编辑判断，不是精确测量。理论论文、实验论文、数据集和综述使用适合各自类型的证据标准。名气和引用量不代替内容评价。
 
-首次公告、提交、修订、在线发表、正式卷期日期分别记录。预印本有 DOI 不代表经过同行评审。检索失败不能解释为没有新文；质量不足时如实报告缺项，不降低标准凑数。v0.1 会保留未满额的预备材料，但不会将其发布为完整日报。备选池数量与复评周期由 Agent 按规则管理，Python 不会自动判断质量或清理候选。细则见 [首次配置](references/onboarding.md) 和 [筛选规则](references/selection.md)。
+首次公告、提交、修订、在线发表、正式卷期日期分别记录。预印本有 DOI 不代表经过同行评审。检索失败不能解释为没有新文；质量不足时如实报告缺项，不降低标准凑数。当前工具会保留未满额的预备材料，但不会将其发布为完整日报。备选池数量与复评周期由 Agent 按规则管理，Python 不会自动判断质量或清理候选。细则见 [首次配置](references/onboarding.md) 和 [筛选规则](references/selection.md)。
 
 ## 输出结构
 
@@ -123,7 +123,7 @@ my-literature/
 | `validate` | 校验全库与指定日期的产物 |
 | `doctor` | 检查 Python 依赖和时区支持 |
 
-检索输出只是待核验候选，不能直接当作精读日报发布。输入支持数组或 `{"papers": [...]}`，字段见 [候选记录说明](references/candidate-schema.md)。仓库示例为明确标注的虚构示例，不可作为真实学术证据发布。
+检索输出只是待核验候选，不能直接当作精读日报发布。输入支持数组、`{"papers": [...]}` 或 `{"candidates": [...]}`，字段见 [候选记录说明](references/candidate-schema.md)。仓库示例为明确标注的虚构示例，不可作为真实学术证据发布。
 
 ## 定时与跨平台
 
@@ -145,3 +145,20 @@ python -m pytest -q
 流程参考了 [arxiv](https://smithery.ai/skills/lianggs8/arxiv)、[paper-daily](https://smithery.ai/skills/su-lan/paper-daily)、[paper-read-skill](https://github.com/Ayanami0730/paper-read-skill) 与 [nature-academic-search](https://github.com/Yuan1z0825/nature-skills/tree/main/skills/nature-academic-search)。它们不是运行依赖，项目不会自动安装。此处代码与文档独立编写；第三方论文和服务遵循各自条款。
 
 项目采用 [MIT 许可证](LICENSE)。
+
+## v0.2：先看重点团队动态，再看论文
+
+可选启用 **每日8篇论文＋0–3条重要动态＋周日过去7天研究路线梳理**。动态和周日梳理均显示在论文总表与阅读卡片之前。跟踪对象由用户自选，通用包不内置私人名单；作者名气不进入论文评分。
+
+只收录有实质内容的新论文、重要修订、代码／权重／数据发布，以及技术报告或演讲。分别记录实际发生、首次发现和核验时间；多作者、多来源合并为一个事件。首次建立基线、日期未知、来源失败和真正没有合格更新分别报告。旧论文的新代码可以报动态，但论文不会重复推荐。周日最多总结3条“前作解决什么→这次补了什么→仍缺什么”，提出1–2个可验证问题；证据不足时不推断团队转向。
+
+复制[可选配置示例](examples/profile.watch.example.json)，换成自己的对象和官方入口，再按已有授权确认配置。详细字段与运行方式见[动态跟踪说明](references/watch.md)，[事件示例](examples/watch.example.json)为不可当作真实证据发布的合成数据。
+
+```text
+python scripts/paper_daily.py watch prepare --profile my-profile.json --input events.json --date YYYY-MM-DD
+python scripts/paper_daily.py watch publish --profile my-profile.json --input events.json --date YYYY-MM-DD
+python scripts/paper_daily.py watch validate --profile my-profile.json --date YYYY-MM-DD
+python scripts/paper_daily.py publish --profile my-profile.json --input selected.json --date YYYY-MM-DD --updates literature/watch/YYYY-MM-DD/updates.json
+```
+
+动态登记、锁和可恢复事务都在独立 `watch/` 下；预备不占展示名额，同日相同内容重跑不重复通知。旧配置缺少 `watch` 时保持关闭，不补字段、不改确认指纹；不传 `--updates` 的原流程保持兼容。动态故障不会阻断论文交付，但要说明覆盖缺口。已有中文或自定义文献库只调用 `watch`，用原写入器将动态 Markdown 放到论文前，不迁移论文台账。仍需真实 Agent 执行检索和学术判断，Python 本身不是自动资讯机器人。

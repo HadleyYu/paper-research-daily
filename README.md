@@ -82,7 +82,7 @@ python scripts/paper_daily.py confirm --profile ./my-profile.json
 | Active pool | Up to 100 entries, reassessed after 14 days |
 | Scheduling | Disabled; manual execution by default |
 
-First announcement, submission, revision, online publication, and issue dates are distinct. A preprint DOI does not prove peer review. Source failures are reported; the agent does not lower quality standards to fill a quota. If too few papers qualify, version 0.1 saves partial prepared work and reports the shortfall instead of publishing an incomplete digest. Pool size and reassessment are agent-managed policies, not automatic pruning. See [onboarding](references/onboarding.md) and [selection](references/selection.md).
+First announcement, submission, revision, online publication, and issue dates are distinct. A preprint DOI does not prove peer review. Source failures are reported; the agent does not lower quality standards to fill a quota. If too few papers qualify, the helper saves partial prepared work and reports the shortfall instead of publishing an incomplete digest. Pool size and reassessment are agent-managed policies, not automatic pruning. See [onboarding](references/onboarding.md) and [selection](references/selection.md).
 
 ## Library layout
 
@@ -119,7 +119,7 @@ Use `python scripts/paper_daily.py COMMAND --help` for arguments, or `paper-dail
 | `validate` | Check library integrity and optional date output |
 | `doctor` | Check Python dependencies and timezone support |
 
-Search results are unverified candidates. The agent must enrich them with source evidence, reading cards, and scores before publication. Candidate inputs accept an array or `{"papers": [...]}`; see [the candidate contract](references/candidate-schema.md) and the deliberately synthetic examples. Examples are not publishable research evidence.
+Search results are unverified candidates. The agent must enrich them with source evidence, reading cards, and scores before publication. Candidate inputs accept an array, `{"papers": [...]}`, or `{"candidates": [...]}`; see [the candidate contract](references/candidate-schema.md) and the deliberately synthetic examples. Examples are not publishable research evidence.
 
 ## Recurring execution
 
@@ -143,3 +143,20 @@ Output stays local by default. No library upload, email delivery, account login,
 The workflow draws inspiration from [arxiv](https://smithery.ai/skills/lianggs8/arxiv), [paper-daily](https://smithery.ai/skills/su-lan/paper-daily), [paper-read-skill](https://github.com/Ayanami0730/paper-read-skill), and [nature-academic-search](https://github.com/Yuan1z0825/nature-skills/tree/main/skills/nature-academic-search). They are not installed or required by this package. The implementation and documentation here are independently authored; third-party papers and services retain their own terms.
 
 Code and skill materials: [MIT](LICENSE).
+
+## v0.2: researcher and team updates before papers
+
+Optionally combine the existing paper digest with **0–3 verified research updates per day** and a **Sunday review of the preceding seven days**. Updates and the Sunday review appear before the paper table. Follow researchers or teams chosen by the user; no private watchlist is built in, and author prestige never changes paper scores.
+
+The agent verifies substantive new papers/revisions, code, weights, data and technical talks. It records occurrence, first discovery and verification separately, merges coauthor/source duplicates, distinguishes baselines and unknown dates from new events, and states source failures. A new code release for an old recommended paper is a new event, not another paper recommendation. Sunday's review traces previous work → new evidence → remaining gaps and proposes 1–2 testable questions, or explicitly reports insufficient evidence.
+
+Copy [the optional profile example](examples/profile.watch.example.json), replace its synthetic targets and confirm the requested standards. See the complete [watch contract and workflow](references/watch.md) and [synthetic event input](examples/watch.example.json).
+
+```text
+python scripts/paper_daily.py watch prepare --profile my-profile.json --input events.json --date YYYY-MM-DD
+python scripts/paper_daily.py watch publish --profile my-profile.json --input events.json --date YYYY-MM-DD
+python scripts/paper_daily.py watch validate --profile my-profile.json --date YYYY-MM-DD
+python scripts/paper_daily.py publish --profile my-profile.json --input selected.json --date YYYY-MM-DD --updates literature/watch/YYYY-MM-DD/updates.json
+```
+
+The independent `watch/` ledger, lock and recoverable transaction never alter paper history. Preparation consumes no display slots; identical reruns do not notify again. Older profiles without `watch` keep their fingerprints and old commands remain valid. Optional feed failures do not block papers. Existing custom libraries can use watch alone and prepend its Markdown through their current writer; do not migrate their paper registry. Scheduling still needs a real agent runtime: the Python CLI does not autonomously fetch and analyze news.

@@ -126,6 +126,10 @@ def validate_profile(profile: dict) -> None:
             for value in obj:
                 check_keys(value)
     check_keys(profile)
+    # Absence means disabled: do not inject a default into legacy fingerprints.
+    if "watch" in profile:
+        from .watch import validate_config
+        validate_config(profile["watch"])
 
 
 def load_profile(path: str | Path) -> dict:

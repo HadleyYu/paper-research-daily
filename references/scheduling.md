@@ -48,3 +48,7 @@ There is intentionally no universal fabricated `agent run` command: agent CLIs h
 ## Completion and recovery
 
 Prevent overlapping finalization runs for the same library. Give network retries a finite budget and preserve prepared work on interruption. Validate files and state after a run. If the machine was asleep or the agent could not start, report a missed run when next invoked; the skill cannot promise a deadline while its host is unavailable. Do not silently switch a user's local-only workflow to a remote service.
+
+## Optional watch in the same two phases
+
+When enabled, preparation also verifies official team/project sources and saves a `watch prepare` snapshot. Finalization commits the watch snapshot, uses `--updates` to place it **before papers**, and runs `watch validate`. On local Sundays it includes the last-seven-day route review (or an explicit insufficient-evidence result). A failed feed must not block the paper deadline. For existing custom libraries, keep their writer and prepend the rendered watch Markdown; never run public paper migration commands. See [watch](watch.md). Update both persistent task prompts when enabling this feature; do not rely on conversational memory alone.

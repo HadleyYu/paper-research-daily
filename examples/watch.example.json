@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "timezone": "Asia/Shanghai",
+  "generated_at": "2026-10-17T00:05:00+00:00",
+  "coverage": [
+    {
+      "target_id": "alpha",
+      "status": "checked",
+      "checked_at": "2026-10-17T00:05:00+00:00",
+      "detail": "Attempted original sources.",
+      "sources": [
+        "https://example.org/alpha"
+      ]
+    },
+    {
+      "target_id": "beta",
+      "status": "checked",
+      "checked_at": "2026-10-17T00:05:00+00:00",
+      "detail": "Attempted original sources.",
+      "sources": [
+        "https://example.org/beta"
+      ]
+    }
+  ],
+  "events": [
+    {
+      "kind": "code",
+      "revision": "owner/project@v1",
+      "title": "A reusable experiment release",
+      "target_ids": [
+        "alpha"
+      ],
+      "work": {
+        "arxiv_id": "2610.12345v2",
+        "doi": "10.1234/example",
+        "title": "Shared study",
+        "authors": [
+          "A. Example"
+        ]
+      },
+      "occurred_at": "2026-10-16T12:00:00Z",
+      "date_evidence": "Dated official release",
+      "first_discovered_at": "2026-10-16T13:00:00Z",
+      "verified_at": "2026-10-16T13:30:00Z",
+      "disposition": "eligible",
+      "summary": "An agent supplied grounded summary.",
+      "delta": "Reproducible evaluation is now available.",
+      "relevance": "Enables a controlled comparison.",
+      "action": "Review the setup before reproduction.",
+      "limitations": "Not run independently.",
+      "impact": 4,
+      "impact_reason": "Changes the next experiment decision.",
+      "sources": [
+        {
+          "url": "https://example.org/release",
+          "primary": true,
+          "supports": "Release and scope",
+          "verified_at": "2026-10-16T13:30:00Z"
+        }
+      ],
+      "example_only": true
+    }
+  ]
+}

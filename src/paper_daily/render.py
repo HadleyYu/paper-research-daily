@@ -35,7 +35,7 @@ def _content(value):
     return str(value or "")
 
 
-def render_overview(date: str, papers: list[dict], profile: dict) -> str:
+def render_overview(date: str, papers: list[dict], profile: dict, updates=None) -> str:
     zh = profile.get("language", "zh-CN") == "zh-CN"
     labels = ZH if zh else EN
     heading = "研究文献日报" if zh else "Research paper daily"
@@ -50,6 +50,9 @@ def render_overview(date: str, papers: list[dict], profile: dict) -> str:
               f"{'论文' if zh else 'Papers'}: {len(papers)}; "
               f"{'正式发表' if zh else 'published'}: {published}; "
               f"{'近期新文' if zh else 'recent'}: {new}; PDF: {pdfs}.", ""]
+    if updates is not None:
+        from .watch import render_updates
+        lines += [render_updates(updates, profile.get("language", "zh-CN")), "", "## 今日论文" if zh else "## Today's papers", ""]
     if papers:
         first = papers[0]
         lines += [f"**{'先读' if zh else 'Read first'}: {first['title']}** — {first.get('selection_reason', '')}", ""]

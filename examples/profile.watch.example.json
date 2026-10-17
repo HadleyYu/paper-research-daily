@@ -1,0 +1,91 @@
+{
+  "schema_version": 1,
+  "project": {
+    "name": "Reliable decision making",
+    "research_question": "Reliable decision making",
+    "topics": [
+      "Reliable decision making"
+    ],
+    "exclude": [],
+    "level": "graduate"
+  },
+  "output_root": "./literature",
+  "language": "zh-CN",
+  "timezone": "Asia/Shanghai",
+  "selection": {
+    "daily_count": 1,
+    "new_count": 0,
+    "published_count": 1,
+    "weekend_mode": "combined",
+    "lookback_hours": 72,
+    "max_lookback_days": 7,
+    "min_score": 75,
+    "min_relevance": 25,
+    "allow_abstract_only": false,
+    "pool_limit": 100,
+    "reevaluate_days": 14
+  },
+  "scoring": {
+    "relevance": 35,
+    "evidence": 25,
+    "inspiration": 20,
+    "novelty": 10,
+    "representative": 5,
+    "reproducibility": 5
+  },
+  "sources": {
+    "new": [
+      "arxiv"
+    ],
+    "published": [
+      "crossref",
+      "openalex",
+      "official"
+    ]
+  },
+  "analysis": {
+    "depth": "dense",
+    "chinese_character_range": [
+      1200,
+      1800
+    ],
+    "distinguish_author_and_analysis": true
+  },
+  "schedule": {
+    "enabled": false,
+    "timezone": "America/New_York",
+    "prepare_time": "19:00",
+    "final_time": "20:05",
+    "deadline": "09:30"
+  },
+  "confirmation": {
+    "status": "draft",
+    "confirmed_at": null
+  },
+  "watch": {
+    "enabled": true,
+    "daily_limit": 3,
+    "weekly": {
+      "enabled": true,
+      "weekday": 6
+    },
+    "targets": [
+      {
+        "id": "alpha",
+        "name": "Example Research Group A",
+        "relevance": "Finite-data decision quality",
+        "official_urls": [
+          "https://example.org/alpha"
+        ]
+      },
+      {
+        "id": "beta",
+        "name": "Example Research Group B",
+        "relevance": "Reliable adaptation",
+        "official_urls": [
+          "https://example.org/beta"
+        ]
+      }
+    ]
+  }
+}

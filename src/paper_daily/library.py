@@ -324,7 +324,7 @@ def update_pool(root: Path, records) -> dict:
         return _pool_update(root, records)
 
 
-def prepare(root: Path, date: str, candidates: list[dict], profile: dict | None = None) -> dict:
+def prepare(root: Path, date: str, candidates: list[dict], profile: dict | None = None, *, updates=None) -> dict:
     _date(date)
     with _lock(root) as root:
         result = _pool_update(root, candidates)
@@ -346,7 +346,9 @@ def prepare(root: Path, date: str, candidates: list[dict], profile: dict | None 
                   "尚未正式推荐，不占用日报名额，也未新增推荐历史。以下为已登记候选的工作稿；数量可能不足，评分与卡片可能仍待核验。\n\n"
                   "Prepared candidates only: this is not a published daily report. No recommendation history is consumed. Counts, scores and analysis may be incomplete.\n\n")
         overview = folder / "00_prepared.md"
-        _atomic(overview, header + render_overview(date, preview, profile or {"language": "zh-CN"}), text=True)
+        if updates is not None:
+            _atomic(folder / "watch_updates.json", updates)
+        _atomic(overview, header + render_overview(date, preview, profile or {"language": "zh-CN"}, updates), text=True)
         return {"date": date, "prepared": len(result["accepted"]), "rejected": result["rejected"], "recommended": 0, "overview": str(overview)}
 
 
@@ -441,13 +443,15 @@ def _safe_filename(rank, title):
     return f"{rank:02d}_{value}.pdf"
 
 
-def _fingerprint(papers, profile):
+def _fingerprint(papers, profile, updates=None):
     ignored = {"rank", "pdf_file", "id", "recommended_dates", "first_seen_at", "files", "status", "source_pdf"}
     payload = {"profile": profile, "papers": [{k: v for k, v in p.items() if k not in ignored} for p in papers]}
+    if updates is not None:
+        payload["watch_updates"] = updates
     return hashlib.sha256(json.dumps(payload, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
 
 
-def publish(root: Path, date: str, papers, profile) -> dict:
+def publish(root: Path, date: str, papers, profile, *, updates=None) -> dict:
     day = _date(date)
     if profile.get("confirmation", {}).get("status") != "confirmed":
         raise ValueError("Confirm the user's standards before publishing")
@@ -477,7 +481,7 @@ def publish(root: Path, date: str, papers, profile) -> dict:
             deficit = rules["new_count"] - new_count
             if deficit and sum(bool(p.get("fallback_reason")) for p in selected if p["category"] == "published") < deficit:
                 raise ValueError("Published quota replacements require explicit fallback_reason for each missing new paper")
-        fingerprint = _fingerprint(selected, profile)
+        fingerprint = _fingerprint(selected, profile, updates)
         target = root / date
         if target.exists():
             existing = _json(target / "metadata.json", {})
@@ -504,8 +508,12 @@ def publish(root: Path, date: str, papers, profile) -> dict:
                 if entry.get("pdf_file"):
                     merged.setdefault("files", []).append({"path": f"{date}/{entry['pdf_file']}", "sha256": entry["pdf_sha256"]})
             metadata = {"schema_version": 1, "date": date, "timezone": profile.get("timezone"), "created_at": _utc(), "fingerprint": fingerprint, "mode": "weekend_combined" if weekend else "weekday", "expected_count": rules["daily_count"], "papers": output}
+            if updates is not None:
+                metadata["watch_updates"] = "watch_updates.json"
+                metadata["watch_fingerprint"] = updates["fingerprint"]
+                _atomic(stage / "watch_updates.json", updates)
             _atomic(stage / "metadata.json", metadata)
-            _atomic(stage / "00_overview.md", render_overview(date, output, profile), text=True)
+            _atomic(stage / "00_overview.md", render_overview(date, output, profile, updates), text=True)
             _atomic(stage / "search_log.json", {"date": date, "created_at": _utc(), "remote_urls_validated_by_engine": False, "records": [{"id": p["id"], "sources": p.get("sources", []), "search_log": p.get("search_log", []), "download_status": "downloaded" if p.get("pdf_file") else p.get("download_status", "unavailable"), "download_reason": p.get("download_reason"), "fallback_reason": p.get("fallback_reason")} for p in output]})
             _atomic(root / ".work" / "publication.json", {"transaction": transaction, "date": date, "fingerprint": fingerprint, "registry": registry})
             _recover(root)
@@ -551,6 +559,12 @@ def validate_library(root: Path, date=None, profile=None) -> dict:
             errors.append(f"Missing metadata: {folder.name}")
             continue
         papers = data.get("papers", [])
+        if data.get("watch_updates"):
+            update_path = folder / "watch_updates.json"
+            updates = _json(update_path, {})
+            from .watch import _digest
+            if updates.get("fingerprint") != data.get("watch_fingerprint") or _digest({k:v for k,v in updates.items() if k != "fingerprint"}) != updates.get("fingerprint"):
+                errors.append(f"Changed watch snapshot: {folder.name}")
         expected = data.get("expected_count", profile["selection"]["daily_count"] if profile else None)
         if expected is None or len(papers) != expected:
             errors.append(f"Wrong paper count: {folder.name}")

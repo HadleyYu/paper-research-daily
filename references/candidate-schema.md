@@ -1,6 +1,6 @@
 # Candidate JSON contract
 
-`prepare`, `pool`, and `publish` accept either an array of paper objects or an object containing `papers: [...]`. Preserve UTF-8 text. Search exports are discovery records, not publication-ready cards; the agent must verify and enrich them. [candidate.example.json](../examples/candidate.example.json) is deliberately synthetic and marked `example_only: true`; the publication helper rejects it.
+`prepare`, `pool`, and `publish` accept either an array of paper objects or an object containing `papers: [...]` or `candidates: [...]`. Preserve UTF-8 text. Search exports are discovery records, not publication-ready cards; the agent must verify and enrich them. [candidate.example.json](../examples/candidate.example.json) is deliberately synthetic and marked `example_only: true`; the publication helper rejects it.
 
 ## Bibliographic and reading fields
 
@@ -84,6 +84,6 @@ The engine derives identity from normalized DOI/arXiv IDs and hashes. `aliases` 
 
 `prepare` and `pool` save candidate evidence without recommending it. `publish` accepts the selected array in priority order, checks eligibility and history, and commits the dated report plus registry through a recoverable local transaction. Identical same-date content returns `unchanged`; different content for an existing date is refused to prevent a silent rewrite.
 
-Version 0.1 requires exactly the confirmed `daily_count` at publication. If too few qualified papers are available, retain partial reading with `prepare` and report the actual count and missing evidence to the user; do not fill slots with weak or fabricated candidates or claim completion. Pool limits and reassessment intervals require agent judgment; they are not automatic Python pruning jobs.
+The helper requires exactly the confirmed `daily_count` at publication. If too few qualified papers are available, retain partial reading with `prepare` and report the actual count and missing evidence to the user; do not fill slots with weak or fabricated candidates or claim completion. Pool limits and reassessment intervals require agent judgment; they are not automatic Python pruning jobs.
 
 `validate` checks local files, PDF hashes/readability, recommendation history, counts, ranks, and local Markdown links. It does **not** fetch every remote link or authenticate scholarly claims. The agent must verify official pages, abstract correspondence, publication status, code identity, and important evidence separately. Scanned PDFs with little extractable text require visual reading or OCR review; a parsing warning is not by itself evidence that the file is invalid.

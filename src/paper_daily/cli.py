@@ -53,6 +53,16 @@ def parser():
             sub.add_argument("--input", required=True)
         if name in ("prepare", "publish", "validate"):
             sub.add_argument("--date", help="YYYY-MM-DD in the report timezone")
+        if name in ("prepare", "publish"):
+            sub.add_argument("--updates", help="Verified watch snapshot to place before papers")
+    watch = commands.add_parser("watch", help="Independent researcher/team event ledger")
+    actions = watch.add_subparsers(dest="watch_command", required=True)
+    for name in ("prepare", "publish", "validate"):
+        sub = actions.add_parser(name)
+        sub.add_argument("--profile", required=True)
+        sub.add_argument("--date")
+        if name != "validate":
+            sub.add_argument("--input", required=True)
     search = commands.add_parser("search")
     search.add_argument("--source", required=True, choices=["arxiv", "arxiv-recent", "crossref", "openalex"])
     search.add_argument("--query", required=True, help="Search text, or category for arxiv-recent")
@@ -123,20 +133,41 @@ def main(argv=None):
         from . import library
         root = library_root(profile, args.profile)
         date = getattr(args, "date", None)
-        if command != "validate" and not is_confirmed(profile):
+        read_only = command == "validate" or (command == "watch" and args.watch_command == "validate")
+        if not read_only and not is_confirmed(profile):
             raise ValueError("Profile is draft or has changed. Obtain user confirmation, then run confirm.")
-        if command == "scan":
+        updates = None
+        updates_error = None
+        if getattr(args, "updates", None):
+            from .watch import load_snapshot
+            try:
+                updates = load_snapshot(args.updates, date or report_date(profile), profile, published=command == "publish")
+            except (ValueError, OSError, KeyError, TypeError) as exc:
+                # An optional news feed must never prevent the paper delivery.
+                updates_error = str(exc)
+        if command == "watch":
+            from . import watch
+            day = date or report_date(profile)
+            if args.watch_command == "validate":
+                result = watch.validate(root, date, profile)
+            else:
+                data = json.loads(Path(args.input).read_text(encoding="utf-8-sig"))
+                result = getattr(watch, args.watch_command)(root, day, data, profile)
+        elif command == "scan":
             result = library.scan_existing(root)
         elif command == "pool":
             result = library.update_pool(root, _papers(args.input))
         elif command == "prepare":
-            result = library.prepare(root, date or report_date(profile), _papers(args.input), profile)
+            result = library.prepare(root, date or report_date(profile), _papers(args.input), profile, updates=updates)
         elif command == "publish":
-            result = library.publish(root, date or report_date(profile), _papers(args.input), profile)
+            result = library.publish(root, date or report_date(profile), _papers(args.input), profile, updates=updates)
         elif command == "validate":
             result = library.validate_library(root, date, profile)
         else:
             raise ValueError("Unknown command")
+        if updates_error:
+            result["updates_error"] = updates_error
+            result["updates_action"] = "Papers delivered without updates; disclose the coverage failure in the delivery message."
         _emit(result)
         return 1 if result.get("ok") is False else 0
     except (ValueError, OSError, KeyError, TypeError, RuntimeError) as exc:
